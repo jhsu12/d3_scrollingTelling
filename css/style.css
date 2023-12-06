@@ -81,8 +81,9 @@
 .d3-tip {
   line-height: 1;
   padding: 6px;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 1);
   color: #fff;
+  z-index: 9999;
   border-radius: 4px;
   font-size: 12px;
 }
