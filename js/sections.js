@@ -197,21 +197,28 @@ var scrollVis = function () {
       ///// Second Plot: Record Gender Piechart
       let recordData = AusData.filter((d) => d.Fate !=  -1 );
       let maleData = recordData.filter((d) => d.Gender=='m');
+      let male_survive = maleData.filter((d) => d.Fate == 1);
+      let femaleData = recordData.filter((d) => d.Gender=='w');
+      let female_survive = femaleData.filter((d) => d.Fate == 1);
+
+      //console.log(male_survive);
      
       RGender_pieG = svg.append('g').attr('transform', 'translate(' + 400 + ',' + 200 + ')');
       RGender_pieG.style('opacity', 0);
       
       // First Recorded vs Unrecorded Pie Chart
       data2 = [
-        { label: 'Male', value: maleData.length },
-        { label: 'Female', value: recordData.length - maleData.length }
+        { label: 'Male', value: maleData.length, survivors: male_survive.length, deaths: maleData.length-male_survive.length },
+        { label: 'Female', value: femaleData.length, survivors: female_survive.length, deaths: femaleData.length-female_survive.length  }
       ];
-      //console.log(data2);
+      console.log(data2);
+      
       // Set up color scale
       var color2 = d3.scaleOrdinal()
       .range(["steelblue", 'pink']);
 
-      // Create a pie chart layout
+      
+          // Create a pie chart layout
       var pie2 = d3.pie()
       .value(function(d) { return d.value; });
 
@@ -603,7 +610,7 @@ var scrollVis = function () {
         })
         
       })
-      console.log(data4);
+      //console.log(data4);
 
       ScatterG = svg.append('g').attr('transform', 'translate(' + 100 + ',' + 50 + ')');
       ScatterG.style('opacity', 0);
@@ -710,67 +717,129 @@ var scrollVis = function () {
           .text("Survival Rate (%)");
 
       // Regression analysis
-      
-      // reg_data4 = [];
-      // data4.forEach(d => {
-      //   age = +d.Age;
-      //   sur_rate = +(d.Survive / (d.Dead + d.Survive)* 100).toFixed(2);
-      //   reg_data4.push([age, sur_rate]);
-      // })
-
-
-      // Create a LOESS regression line
-      // const loessLine = d3.regressionLoess()
-      // .x(d => d[0])
-      // .y(d => d[1])
-      // .bandwidth(0.5); // Adjust bandwidth as needed
-
-      // // Calculate the LOESS points based on the data
-      // const loessData = loessLine(reg_data4);
-
-      // ScatterG.append("path")
-      // .datum(loessData)
-      // .attr("fill", "none")
-      // .attr("stroke", "blue")
-      // .attr("stroke-width", 2)
-      // .attr("d", d3.line()
-      //   .x(d => d[0])
-      //   .y(d => d[1])
-      // );
-      // console.log(reg_data4);
-
-      // filter0 = reg_data4.filter(d => {return d[1] != 0})
-      // console.log(filter0);
-
-      // var order = 3;
-
-      // //console.log(reg_data4);
-      // var result = regression.polynomial(filter0, { order: order });
-
-      // // Extract the coefficients from the result
-      // var coefficients = result.equation;
-      // //console.log(coefficients);
-
-      // var regressionLine = d3.line()
-      // .x(function(d) { return xScale4(d[0]); })
-      // .y(function(d) {
-      //   var y = 0;
-      //   for (var i = 0; i < order; i++) {
-      //     y += coefficients[i] * Math.pow(d[0], i);
-      //   }
-      //   return yScale4(y);
-      // });
-      // console.log(regressionLine.y()([15, 0]))
-      // //console.log(result.equation[0], result.equation[1]);
-
-      // ScatterG.append("path")
-      // .datum([[1, 0], [20, 2]])
-      // .attr("class", "regression-line")
-      // .attr("d", regressionLine)
-      // .style("stroke", "red");
+      RGender_barG = svg.append('g').attr('transform', 'translate(' + 150 + ',' + 190 + ')');
+      RGender_barG.style('opacity', 0);
 
       
-  };
+
+      // Create x-axis scale
+      var xScale2 = d3.scaleBand()
+      .domain(data2.map(function (d) { return d.label; }))
+      .range([0, 500])
+      .padding(0.5);
+
+      // Create y-axis scale
+      var yScale2 = d3.scaleLinear()
+        .domain([0, d3.max(data2, function (d) { return d.value; })])
+        .range([300, 0]);
+
+     
+
+      // Create x-axis
+      RGender_barG.append('g')
+        .attr('transform', 'translate(0, 300)')
+        .call(d3.axisBottom(xScale2))
+        .style("font-size", "16px"); 
+
+      // Create y-axis
+      RGender_barG.append('g')
+        .call(d3.axisLeft(yScale2))
+        .style("font-size", "16px"); 
+
+      var bars2 = RGender_barG.selectAll('rect')
+      .data(data2)
+      .enter()
+      .append('rect')
+      .attr('x', function (d) {
+        return xScale2(d.label);
+      })
+      .attr('y', function (d) {
+        return yScale2(d.value);
+      })
+      .attr('width', xScale2.bandwidth())
+      .attr('height', function (d) {
+        return 300 - yScale2(d.value);
+      })
+      .attr('fill', function (d) {
+        return d.label === 'Male' ? 'steelblue' : 'pink'; // Adjust colors as needed
+      });
+
+
+      // Create a legend
+      legend2 = RGender_barG.append("g")
+      .attr("class", "legend")
+      .attr("transform", `translate(${plotWidth-100}, ${margin.top})`);
+    
+      legend2.append("rect")
+        .attr("x", 0)
+        .attr("y", 0)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", "steelblue");
+    
+      legend2.append("text")
+        .attr("x", 30)
+        .attr("y", 10)
+        .attr("dy", "0.7em")
+        .text("Male");
+    
+      legend2.append("rect")
+        .attr("x", 0)
+        .attr("y", 30)
+        .attr("width", 20)
+        .attr("height", 20)
+        .attr("fill", "pink");
+    
+      legend2.append("text")
+        .attr("x", 30)
+        .attr("y", 40)
+        .attr("dy", "0.7em")
+        .text("Female");
+
+      // x-axis, y-axis
+      RGender_barG.append("text").attr("x", plotWidth/2-50).attr("y", 330 )
+          .attr("font-size", "12px")
+          .text("Gender")
+      RGender_barG.append("text").attr("x", -40).attr("y", plotHeight/2)
+              .attr("font-size", "10px")
+              .attr("transform", "rotate(-90, -40, " + (plotHeight/2+30) + ")")
+              .text("Number of prisoners")
+
+  //    // Create grouped bars for each gender
+  //   var groups = RGender_barG.selectAll('.group')
+  //   .data(data2)
+  //   .enter()
+  //   .append('g')
+  //   .attr('class', 'group')
+  //   .attr('transform', function (d) {
+  //     return 'translate(' + xScale2(d.gender) + ',0)';
+  //   });
+
+  // // Create stacked bars for survivors and deaths within each gender
+  // groups.selectAll('rect')
+  //   .data(function (d) {
+  //     return [d.survivors, d.deaths];
+  //   })
+  //   .enter()
+  //   .append('rect')
+  //   .attr('x', 0)
+  //   .attr('y', function (d, i) {
+  //     return yScale(d3.sum(genderData, function (group) {
+  //       return group.survivors + group.deaths;
+  //     }) - d3.sum(genderData.slice(i + 1), function (group) {
+  //       return group.survivors + group.deaths;
+  //     }));
+  //   })
+  //   .attr('width', xScale.bandwidth())
+  //   .attr('height', function (d) {
+  //     return 200 - yScale(d);
+  //   })
+  //   .attr('fill', function (d, i) {
+  //     return colorScale(i === 0 ? 'survivors' : 'deaths');
+  //   })
+  //   .attr('class', 'bar');
+        
+     };
 
   /**
    * setupSections - each section is activated
@@ -828,6 +897,7 @@ var scrollVis = function () {
   function showURPieChart(){
     TitleG.transition().duration(200).style('opacity', 0);
     RGender_pieG.transition().duration(200).style('opacity', 0);
+    RGender_barG.transition().duration(200).style('opacity', 0);
     // scatterPlotG.transition().duration(200).style('opacity', 0);
     UR_pieG.transition().duration(200).style('opacity', 1);
     // circles.on('mouseover', tip.show).on('mouseout', tip.hide);
@@ -835,7 +905,8 @@ var scrollVis = function () {
   function showRGenderPieChart(){
     UR_pieG.transition().duration(200).style('opacity', 0);
     RAgeGender_stackG.transition().duration(200).style('opacity', 0);
-    RGender_pieG.transition().duration(200).style('opacity', 1);
+    RGender_barG.transition().duration(200).style('opacity', 1);
+   //RGender_pieG.transition().duration(200).style('opacity', 1);
     // TitleG.transition().duration(200).style('opacity', 0);
     // barChartG.transition().duration(200).style('opacity', 0);
     // scatterPlotG.transition().duration(200).style('opacity', 1);
@@ -844,6 +915,7 @@ var scrollVis = function () {
   
   function showRBarChartPlot(){
     RGender_pieG.transition().duration(200).style('opacity', 0);
+    RGender_barG.transition().duration(200).style('opacity', 0);
     RAgeGender_stackG.transition().duration(200).style('opacity', 1);
     RAgeGender_stackG.selectAll('.bar').transition().duration(500).attr("transform", d => `translate(${xScale(d.ageGroup)}, 0)`);
     chart3_sorted_xaxis.transition().duration(500).call(d3.axisBottom(xScale));
