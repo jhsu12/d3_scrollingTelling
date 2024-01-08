@@ -3,8 +3,9 @@
 This is the final project of the Data Visualization course.
 I'm doing a d3 scolling-telling project.
 
-[Project website](https://jhsu12.github.io/course/data_visualization/project/).
-[Demo Video](https://www.youtube.com/watch?v=tU0QAqyNGkE).
+[Project website](https://jhsu12.github.io/course/data_visualization/project/)
+
+[Demo Video](https://www.youtube.com/watch?v=tU0QAqyNGkE)
 
 
 ## Overview
